@@ -1,10 +1,14 @@
+"""
+pySpark script to upload csv files in 'raw' folder, transform and analyse them
+"""
 import pathlib
+
+from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import when, col, lit, regexp_replace, split, count, round, avg
 from pyspark.sql.types import IntegerType as Int
 
 address_in = pathlib.Path('.').absolute() / 'files/raw'
-address_out = pathlib.Path('.').absolute() / 'files/clean'
 
 # column and category definition
 categories = ('change', 'buy', 'want_2_rent', 'rent_by_day', 'rent', 'sell')
@@ -55,14 +59,13 @@ def set_categories(data_frame):
     return df_chng.withColumn(com_type, when(df_chng.com_type.isNull(), lit('other')).otherwise(df_chng.com_type))
 
 
-def clean_price(data_frame):
-    df_ref1 = data_frame.withColumn(price_refined, regexp_replace(col(price), "€", ""))
-    df_ref2 = df_ref1.withColumn(price_refined, regexp_replace(col(price_refined), "/mēn.", ""))
-    df_ref3 = df_ref2.withColumn(price_refined, regexp_replace(col(price_refined), "/dienā", ""))
-    df_ref4 = df_ref3.withColumn(price_refined, regexp_replace(col(price_refined), "maiņai", ""))
-    df_ref5 = df_ref4.withColumn(price_refined, regexp_replace(col(price_refined), "pērku", ""))
-    df_ref6 = df_ref5.withColumn(price_refined, regexp_replace(col(price_refined), "vēlosīret", ""))
-    return df_ref6.withColumn(price_refined, regexp_replace(col(price_refined), ",", ""))
+def clean_price(data_frame: DataFrame) -> DataFrame:
+    """
+    Remove any non-numeric symbols
+    :param data_frame: DataFrame
+    :return: DataFrame
+    """
+    return data_frame.withColumn(price_refined, regexp_replace(col(price), "[^0-9]", ""))
 
 
 def set_top_floor(data_frame):
