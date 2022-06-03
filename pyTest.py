@@ -62,7 +62,6 @@ def test_clean_price(spark_session):
     # arrange
     test_df = get_data_frame(spark_session)
     expected_df = get_output_for_price_refinement(spark_session)
-    print(type(test_df))
 
     # act
     output_df = main.clean_price(test_df)
@@ -72,14 +71,26 @@ def test_clean_price(spark_session):
     assert_pyspark_df_equal(expected_df, actual_df)
 
 
+def test_agg_house_types(spark_session):
+    # arrange
+    test_df = get_data_frame(spark_session)
+    expected_df = get_output_for_house_type(spark_session)
+
+    # act
+    output_df = main.commercials_by_house_type(test_df)
+
+    # assert
+    assert_pyspark_df_equal(expected_df, output_df)
+
+
 def get_data_frame(spark_session):
     columns = main.original_columns
     data = [('link1', 'desc1', 'centrs::Valdemāra 106', '3', '72', '1/5', 'Staļina', '105,000  €'),
             ('link2', 'desc2', 'Zolitūde::Lejiņa 18', '3', '74', '10/10', '119.', 'vēlosīret'),
             ('link3', 'desc3', 'Jugla::Murjāņu 52', '2', '44', '1/5', 'Hrušč.', '250  €/mēn.'),
             ('link4', 'desc4', 'centrs::Matīsa 41', '1', '20', '1/2', 'Renov.', '30  €/dienā'),
-            ('link5', 'desc5', 'Āgenskalns::', '3', '65', '-', 'P. kara', 'pērku'),
-            ('link5', 'desc5', 'Pļavnieki::', '2', '-', '-', '602.', 'maiņai')]
+            ('link5', 'desc5', 'Āgenskalns::', '3', '65', '-', 'Renov.', 'pērku'),
+            ('link5', 'desc5', 'Pļavnieki::', '2', '-', '-', '119.', 'maiņai')]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
@@ -96,12 +107,13 @@ def get_output_for_region_extract(spark_session):
 
 def get_output_for_floor_extract(spark_session):
     columns = (main.floor, main.top_floor)
-    data = [('1', '5'),
-            ('10', '10'),
-            ('1', '5'),
-            ('1', '2'),
-            ('-', None),
-            ('-', None)]
+    data = [('1', '5'), ('10', '10'), ('1', '5'), ('1', '2'), ('-', None), ('-', None)]
+    return spark_session.createDataFrame(data).toDF(*columns)
+
+
+def get_output_for_house_type(spark_session):
+    columns = (main.house_type, 'count')
+    data = [('119.', 2), ('Renov.', 2), ('Staļina', 1), ('Hrušč.', 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
