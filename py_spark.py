@@ -4,7 +4,7 @@ pySpark script to upload csv files in 'raw' folder, transform and analyse them
 import pathlib
 
 from pyspark.sql.dataframe import DataFrame
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Column
 from pyspark.sql.functions import when, col, lit, regexp_replace, split, count, round, avg
 from pyspark.sql.types import IntegerType as Int
 
@@ -22,7 +22,23 @@ link, description, street, rooms, m2, floor, house_type, price = original_column
 split_street, region, floor_split, top_floor, com_type, price_refined, top_sell_floor = aggregated_columns
 
 
-def categorize(column_price, price_contains, cat_type, other_col=None):
+def categorize(column_price: str, price_contains: str, cat_type: str, other_col: str = None) -> Column:
+    """
+    Spark function to set a category based on the column's 'column_price' value 'price_contains'.
+    Use with another spark function 'withColumn'.
+    Output value is category type 'cat_type'.
+    If 'other_col' parameter is set, then the value from that column will be in the 'other' clause
+    Example:
+        case when null will be returned if no match found:
+        data_frame.withColumn(my_column_name, categorize(look_up_column, 'look_up_value', value_to_set))
+        case when other value will be returned (the values will be kept in original column) if no match found:
+        data_frame.withColumn(my_column_name, categorize(look_up_column, 'look_up_value', value_to_set, other_col=my_column_name))
+    :param column_price: price column for analysis
+    :param price_contains: value to match
+    :param cat_type: category value to set
+    :param other_col: if no match, use the value from that column (avoids unintended nulls)
+    :return: conditional statement wrapped in type Column
+    """
     when_clause = when(col(column_price).contains(price_contains), cat_type)
     if other_col is not None:
         when_clause = when_clause.otherwise(col(other_col))
@@ -49,7 +65,14 @@ def read_files(spark_session, files):
         .csv(files).dropDuplicates()
 
 
-def set_categories(data_frame):
+def set_categories(data_frame: DataFrame) -> DataFrame:
+    """
+    Set categories for records, use 'com_type' column
+    Categories can be found in the header, example: change, buy, want_2_rent ...
+    Each category has identifier in the price which you can use to set it
+    :param data_frame: input DataFrame
+    :return: output DataFrame
+    """
     df_sell = data_frame.withColumn(com_type, categorize(price, '€', sell))
     df_rent = df_sell.withColumn(com_type, categorize(price, '€/mēn', rent, other_col=com_type))
     df_rent_day = df_rent.withColumn(com_type, categorize(price, '€/dienā', rent_by_day, other_col=com_type))
@@ -62,8 +85,9 @@ def set_categories(data_frame):
 def clean_price(data_frame: DataFrame) -> DataFrame:
     """
     Remove any non-numeric symbols
-    :param data_frame: DataFrame
-    :return: DataFrame
+    Use 'price_refined' column
+    :param data_frame: input DataFrame
+    :return: output DataFrame
     """
     return data_frame.withColumn(price_refined, regexp_replace(col(price), "[^0-9]", ""))
 
