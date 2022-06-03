@@ -46,6 +46,7 @@ def categorize(column_price: str, price_contains: str, cat_type: str, other_col:
 
 
 def show_dataframe(dataframe, record_count=None):
+    """print out dataframe"""
     dataframe.cache()
     print("Unique records: ", dataframe.count())
     for cat in categories:
@@ -57,10 +58,13 @@ def show_dataframe(dataframe, record_count=None):
     dataframe.printSchema()
 
 
-def get_files(dir_location): return [str(path) for path in dir_location.glob("./*.csv") if path.is_file()]
+def get_files(dir_location: pathlib.Path) -> list[str]:
+    """search files in the drop zone"""
+    return [str(path) for path in dir_location.glob("./*.csv") if path.is_file()]
 
 
-def read_files(spark_session, files):
+def read_files(spark_session: SparkSession, files: list[str]) -> DataFrame:
+    """read files in the drop zone"""
     return spark_session.read.options(delimiter=';', header='True', multiline='True', escape="\"") \
         .csv(files).dropDuplicates()
 
@@ -92,19 +96,37 @@ def clean_price(data_frame: DataFrame) -> DataFrame:
     return data_frame.withColumn(price_refined, regexp_replace(col(price), "[^0-9]", ""))
 
 
-def set_top_floor(data_frame):
+def set_top_floor(data_frame: DataFrame) -> DataFrame:
+    """
+    From 'floor' column extract upper floor of the building. Use 'top_floor' column
+    :param data_frame: input DataFrame
+    :return: output DataFrame
+    """
     df_top_floor_split = data_frame.withColumn(floor_split, split(data_frame.floor, "/"))
     return df_top_floor_split.withColumn(top_floor, df_top_floor_split.floor_split.getItem(1)) \
         .withColumn(floor, df_top_floor_split.floor_split.getItem(0))
 
 
-def set_region_and_street(data_frame):
+def set_region_and_street(data_frame: DataFrame) -> DataFrame:
+    """
+    From 'street' column extract location, use 'region' for new column name
+    :param data_frame: input DataFrame
+    :return: output DataFrame
+    """
     df_split = data_frame.withColumn(split_street, split(data_frame.street, "::"))
     return df_split.withColumn(region, df_split.split_street.getItem(0)) \
         .withColumn(street, df_split.split_street.getItem(1))
 
 
-def commercials_by_house_type(data_frame):
+def commercials_by_house_type(data_frame: DataFrame):
+    """
+    Count number of records for each house type
+    Assuming aggregated column will have 'count' name
+    Replace '-' house type with 'Unspecified' value
+    Sort count values descending
+    :param data_frame: input DataFrame
+    :return: output DataFrame
+    """
     return data_frame.select(house_type) \
         .withColumn(house_type, regexp_replace(col(house_type), '-', 'Unspecified')) \
         .groupby(house_type) \
@@ -112,7 +134,14 @@ def commercials_by_house_type(data_frame):
         .sort('count', ascending=False)
 
 
-def commercials_by_category(data_frame):
+def commercials_by_category(data_frame: DataFrame):
+    """
+    Count number of records for each commercial type
+    Assuming aggregated column will have 'count' name
+    Sort count values descending
+    :param data_frame: input DataFrame
+    :return: output DataFrame
+    """
     return data_frame.select(com_type) \
         .groupby(com_type) \
         .count() \
@@ -140,27 +169,27 @@ def count_selling_floors(data_frame, category):
 
 def main():
     # create spark session and read all csv files
-    paths = get_files(address_in)
-    spark = SparkSession.builder.master("local[*]").appName("clean_data").getOrCreate()
-    df = read_files(spark, paths)
+    paths: list[str] = get_files(address_in)
+    spark: SparkSession = SparkSession.builder.master("local[*]").appName("clean_data").getOrCreate()
+    df: DataFrame = read_files(spark, paths)
 
     # split street and city
-    df_region_and_street = set_region_and_street(df)
+    df_region_and_street: DataFrame = set_region_and_street(df)
 
     # get top floor
-    df_top_floor = set_top_floor(df_region_and_street)
+    df_top_floor: DataFrame = set_top_floor(df_region_and_street)
 
     # categorize
-    df_other = set_categories(df_top_floor)
+    df_other: DataFrame = set_categories(df_top_floor)
 
     # remove hidden symbols
-    df_desc = df_other.withColumn(description, regexp_replace(col(description), "\n", ""))
+    df_desc: DataFrame = df_other.withColumn(description, regexp_replace(col(description), "\n", ""))
 
     # clean price
-    df_refined = clean_price(df_desc)
+    df_refined: DataFrame = clean_price(df_desc)
 
     # cast numeric
-    df_numeric = df_refined.withColumn(price_refined, col(price_refined).cast(Int()))
+    df_numeric: DataFrame = df_refined.withColumn(price_refined, col(price_refined).cast(Int()))
     df_numeric.cache()
 
     # commercial by house type

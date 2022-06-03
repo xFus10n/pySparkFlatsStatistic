@@ -71,7 +71,7 @@ def test_clean_price(spark_session):
     assert_pyspark_df_equal(expected_df, actual_df)
 
 
-def test_agg_house_types(spark_session):
+def test_agg_house_types_count(spark_session):
     # arrange
     test_df = get_data_frame(spark_session)
     expected_df = get_output_for_house_type(spark_session)
@@ -83,9 +83,22 @@ def test_agg_house_types(spark_session):
     assert_pyspark_df_equal(expected_df, output_df)
 
 
+def test_agg_category_types_count(spark_session):
+    # arrange
+    test_df = get_data_frame(spark_session)
+    expected_df = get_output_for_com_type(spark_session)
+
+    # act
+    categories_df = main.set_categories(test_df)
+    output_df = main.commercials_by_category(categories_df).sort(main.com_type)
+
+    # assert
+    assert_pyspark_df_equal(expected_df, output_df)
+
+
 def get_data_frame(spark_session):
     columns = main.original_columns
-    data = [('link1', 'desc1', 'centrs::Valdemāra 106', '3', '72', '1/5', 'Staļina', '105,000  €'),
+    data = [('link1', 'desc1', 'centrs::Valdemāra 106', '3', '72', '1/5', '-', '105,000  €'),
             ('link2', 'desc2', 'Zolitūde::Lejiņa 18', '3', '74', '10/10', '119.', 'vēlosīret'),
             ('link3', 'desc3', 'Jugla::Murjāņu 52', '2', '44', '1/5', 'Hrušč.', '250  €/mēn.'),
             ('link4', 'desc4', 'centrs::Matīsa 41', '1', '20', '1/2', 'Renov.', '30  €/dienā'),
@@ -113,7 +126,7 @@ def get_output_for_floor_extract(spark_session):
 
 def get_output_for_house_type(spark_session):
     columns = (main.house_type, 'count')
-    data = [('119.', 2), ('Renov.', 2), ('Staļina', 1), ('Hrušč.', 1)]
+    data = [('119.', 2), ('Renov.', 2), ('Unspecified', 1), ('Hrušč.', 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
@@ -126,4 +139,10 @@ def get_output_for_categorization(spark_session):
 def get_output_for_price_refinement(spark_session):
     columns = (main.price_refined,)
     data = [('105000',), ('',), ('250',), ('30',), ('',), ('',)]
+    return spark_session.createDataFrame(data).toDF(*columns)
+
+
+def get_output_for_com_type(spark_session):
+    columns = (main.com_type, 'count')
+    data = [(main.buy, 1), (main.change, 1), (main.rent, 1), (main.rent_by_day, 1), (main.sell, 1), (main.want_2_rent, 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
