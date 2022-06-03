@@ -2,7 +2,8 @@
 pySpark script to upload csv files in 'raw' folder, transform and analyse them
 """
 import pathlib
-
+from datetime import datetime
+from termcolor import colored as c
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql import SparkSession, Column
 from pyspark.sql.functions import when, col, lit, regexp_replace, split, count, round, avg
@@ -167,11 +168,8 @@ def count_selling_floors(data_frame, category):
         .agg(count(floor).alias('sell_counts')).sort('sell_counts', ascending=False)
 
 
-def main():
-    # create spark session and read all csv files
-    paths: list[str] = get_files(address_in)
-    spark: SparkSession = SparkSession.builder.master("local[*]").appName("clean_data").getOrCreate()
-    df: DataFrame = read_files(spark, paths)
+def transform(df: DataFrame) -> DataFrame:
+    """ Start transformation and clean-ups"""
 
     # split street and city
     df_region_and_street: DataFrame = set_region_and_street(df)
@@ -190,25 +188,56 @@ def main():
 
     # cast numeric
     df_numeric: DataFrame = df_refined.withColumn(price_refined, col(price_refined).cast(Int()))
-    df_numeric.cache()
+    return df_numeric.cache()
 
-    # commercial by house type
-    commercials_by_house_type(df_numeric).show()
 
-    # commercials by commercial type
-    commercials_by_category(df_numeric).show()
+def aggregate(df_numeric: DataFrame):
+    """Start aggregations"""
+
+    print(c('Number of records for each house type :', 'green'))
+    commercials_by_house_type(df_numeric).show(100, truncate=False)
+
+    print(c('Number of records for each commercial type :', 'green'))
+    commercials_by_category(df_numeric).show(100, truncate=False)
 
     # top zones
-    top_zones_by_commercial_count(df_numeric).show()
+    print(c('Number of records  sorted by regions/zones:', 'green'))
+    top_zones_by_commercial_count(df_numeric).show(100, truncate=False)
 
-    # average prices (sell, rent, rent by day)
-    average_price_by_category(df_numeric, sell).show()
-    average_price_by_category(df_numeric, rent).show()
-    average_price_by_category(df_numeric, rent_by_day).show()
+    print(c('Average price for category :', 'green'), c(sell, 'yellow'))
+    average_price_by_category(df_numeric, sell).show(100, truncate=False)
 
-    # top-selling floor
-    count_selling_floors(df_numeric, sell).show()
-    top_floors(df_numeric).show()
+    print(c('Average price for category :', 'green'), c(rent, 'yellow'))
+    average_price_by_category(df_numeric, rent).show(100, truncate=False)
+
+    print(c('Average price for category :', 'green'), c(rent_by_day, 'yellow'))
+    average_price_by_category(df_numeric, rent_by_day).show(100, truncate=False)
+
+    print(c('Number of selling records for each floor (Most popular floors) :', 'green'))
+    count_selling_floors(df_numeric, sell).show(100, truncate=False)
+
+    print(c('Number of records for each top floor (Most popular building by maximum floor) :', 'green'))
+    top_floors(df_numeric).show(100, truncate=False)
+
+
+def main():
+    # start timer
+    start_time = datetime.now()
+
+    # create spark session and read all csv files
+    paths: list[str] = get_files(address_in)
+    spark: SparkSession = SparkSession.builder.master("local[*]").appName("clean_data").getOrCreate()
+    df: DataFrame = read_files(spark, paths)
+
+    # clean-ups & transformations
+    df_numeric: DataFrame = transform(df)
+
+    # analysis
+    aggregate(df_numeric)
+
+    # show timer
+    time_elapsed = datetime.now() - start_time
+    print(c('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed), 'blue'))
 
 
 if __name__ == '__main__':

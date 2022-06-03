@@ -1,3 +1,4 @@
 pyspark==3.1.1
 pyspark_test==0.2.0
 pytest==7.1.2
+termcolor~=1.1.0
