@@ -119,7 +119,7 @@ def set_region_and_street(data_frame: DataFrame) -> DataFrame:
         .withColumn(street, df_split.split_street.getItem(1))
 
 
-def commercials_by_house_type(data_frame: DataFrame):
+def commercials_by_house_type(data_frame: DataFrame) -> DataFrame:
     """
     Count number of records for each house type
     Assuming aggregated column will have 'count' name
@@ -135,13 +135,13 @@ def commercials_by_house_type(data_frame: DataFrame):
         .sort('count', ascending=False)
 
 
-def commercials_by_category(data_frame: DataFrame):
+def commercials_by_category(data_frame: DataFrame) -> DataFrame:
     """
     Count number of records for each commercial type
     Assuming aggregated column will have 'count' name
     Sort count values descending
     :param data_frame: input DataFrame
-    :return: output DataFrame
+    :return: aggregated DataFrame
     """
     return data_frame.select(com_type) \
         .groupby(com_type) \
@@ -149,7 +149,13 @@ def commercials_by_category(data_frame: DataFrame):
         .sort('count', ascending=False)
 
 
-def top_zones_by_commercial_count(data_frame):
+def top_zones_by_commercial_count(data_frame: DataFrame) -> DataFrame:
+    """
+    Number of records per each zone/region, sorted by column counts
+    Assuming, that aggregated column name is 'counts'
+    :param data_frame: input DataFrame
+    :return: aggregated DataFrame
+    """
     return data_frame.select(region).groupby(region).agg(count(region).alias('counts')) \
         .sort('counts', ascending=False)
 

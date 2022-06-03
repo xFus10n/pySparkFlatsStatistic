@@ -45,6 +45,19 @@ def test_region_extract(spark_session):
     assert_pyspark_df_equal(expected_df, actual_df)
 
 
+def test_number_of_records_by_region(spark_session):
+    # arrange
+    test_df = get_data_frame(spark_session)
+    expected_df = get_output_for_top_zones(spark_session)
+
+    # act
+    output_df = main.set_region_and_street(test_df)
+    actual_df = main.top_zones_by_commercial_count(output_df).sort('counts', main.region, ascending=False)
+
+    # assert
+    assert_pyspark_df_equal(expected_df, actual_df)
+
+
 def test_categorization(spark_session):
     # arrange
     test_df = get_data_frame(spark_session)
@@ -99,7 +112,7 @@ def test_agg_category_types_count(spark_session):
 def get_data_frame(spark_session):
     columns = main.original_columns
     data = [('link1', 'desc1', 'centrs::Valdemāra 106', '3', '72', '1/5', '-', '105,000  €'),
-            ('link2', 'desc2', 'Zolitūde::Lejiņa 18', '3', '74', '10/10', '119.', 'vēlosīret'),
+            ('link2', 'desc2', 'centrs::Lejiņa 18', '3', '74', '10/10', '119.', 'vēlosīret'),
             ('link3', 'desc3', 'Jugla::Murjāņu 52', '2', '44', '1/5', 'Hrušč.', '250  €/mēn.'),
             ('link4', 'desc4', 'centrs::Matīsa 41', '1', '20', '1/2', 'Renov.', '30  €/dienā'),
             ('link5', 'desc5', 'Āgenskalns::', '3', '65', '-', 'Renov.', 'pērku'),
@@ -110,11 +123,20 @@ def get_data_frame(spark_session):
 def get_output_for_region_extract(spark_session):
     columns = (main.region, main.street)
     data = [('centrs', 'Valdemāra 106'),
-            ('Zolitūde', 'Lejiņa 18'),
+            ('centrs', 'Lejiņa 18'),
             ('Jugla', 'Murjāņu 52'),
             ('centrs', 'Matīsa 41'),
             ('Āgenskalns', ''),
             ('Pļavnieki', '')]
+    return spark_session.createDataFrame(data).toDF(*columns)
+
+
+def get_output_for_top_zones(spark_session):
+    columns = (main.region, 'counts')
+    data = [('centrs', 3),
+            ('Āgenskalns', 1),
+            ('Pļavnieki', 1),
+            ('Jugla', 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
