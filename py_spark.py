@@ -160,7 +160,15 @@ def top_zones_by_commercial_count(data_frame: DataFrame) -> DataFrame:
         .sort('counts', ascending=False)
 
 
-def average_price_by_category(dataframe, category):
+def average_price_in_regions_for_category(dataframe: DataFrame, category: str) -> DataFrame:
+    """
+    Selects the particular records, that belongs to a specific commercial category and group these records by region to
+    calculate an average price. The value should be rounded, up to 2 digits after the decimal point.
+    Use name 'price_refined' for aggregated average value
+    :param dataframe: input DataFrame
+    :param category: one of the possible column's 'comm_type' values (sell, rent, rent_by_day).
+    :return: aggregated dataframe
+    """
     return dataframe.filter(col(com_type).eqNullSafe(category)).groupby(region) \
         .agg(round(avg(price_refined), 2).alias(price_refined)).sort(price_refined, ascending=False)
 
@@ -211,13 +219,13 @@ def aggregate(df_numeric: DataFrame):
     top_zones_by_commercial_count(df_numeric).show(100, truncate=False)
 
     print(c('Average price for category :', 'green'), c(sell, 'yellow'))
-    average_price_by_category(df_numeric, sell).show(100, truncate=False)
+    average_price_in_regions_for_category(df_numeric, sell).show(100, truncate=False)
 
     print(c('Average price for category :', 'green'), c(rent, 'yellow'))
-    average_price_by_category(df_numeric, rent).show(100, truncate=False)
+    average_price_in_regions_for_category(df_numeric, rent).show(100, truncate=False)
 
     print(c('Average price for category :', 'green'), c(rent_by_day, 'yellow'))
-    average_price_by_category(df_numeric, rent_by_day).show(100, truncate=False)
+    average_price_in_regions_for_category(df_numeric, rent_by_day).show(100, truncate=False)
 
     print(c('Number of selling records for each floor (Most popular floors) :', 'green'))
     count_selling_floors(df_numeric, sell).show(100, truncate=False)
