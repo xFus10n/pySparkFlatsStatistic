@@ -163,7 +163,7 @@ def get_data_frame_2(spark_session):
 
 
 def get_output_for_region_extract(spark_session):
-    columns = (main.region, main.street)
+    columns = main.region, main.street
     data = [('centrs', 'Valdemāra 106'),
             ('centrs', 'Lejiņa 18'),
             ('Jugla', 'Murjāņu 52'),
@@ -174,14 +174,14 @@ def get_output_for_region_extract(spark_session):
 
 
 def get_output_for_average_price_in_sell_category(spark_session):
-    columns = (main.region, main.price_refined)
+    columns = main.region, main.price_refined
     data = [('centrs', 106336.67),
             ('Jugla', 60003.67)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
 def get_output_for_top_zones(spark_session):
-    columns = (main.region, 'counts')
+    columns = main.region, 'counts'
     data = [('centrs', 3),
             ('Āgenskalns', 1),
             ('Pļavnieki', 1),
@@ -190,37 +190,37 @@ def get_output_for_top_zones(spark_session):
 
 
 def get_output_for_floor_extract(spark_session):
-    columns = (main.floor, main.top_floor)
+    columns = main.floor, main.top_floor
     data = [('1', '5'), ('10', '10'), ('1', '5'), ('1', '2'), ('-', None), ('-', None)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
 def get_output_for_house_type(spark_session):
-    columns = (main.house_type, 'count')
+    columns = main.house_type, 'count'
     data = [('119.', 2), ('Renov.', 2), ('Unspecified', 1), ('Hrušč.', 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
 def get_output_for_categorization(spark_session):
-    columns = (main.com_type,)
+    columns = main.com_type,
     data = [(main.sell,), (main.want_2_rent,), (main.rent,), (main.rent_by_day,), (main.buy,), (main.change,)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
 def get_output_for_price_refinement(spark_session):
-    columns = (main.price_refined,)
+    columns = main.price_refined,
     data = [('105000',), ('',), ('250',), ('30',), ('',), ('',)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
 def get_output_for_most_popular_floor(spark_session):
-    columns = (main.floor, 'counts')
+    columns = main.floor, 'counts'
     data = [("1", 3), ("3", 2), ("2", 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
 def get_output_for_com_type(spark_session):
-    columns = (main.com_type, 'count')
+    columns = main.com_type, 'count'
     data = [(main.buy, 1), (main.change, 1), (main.rent, 1), (main.rent_by_day, 1), (main.sell, 1),
             (main.want_2_rent, 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
