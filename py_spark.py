@@ -162,9 +162,9 @@ def top_zones_by_commercial_count(data_frame: DataFrame) -> DataFrame:
 
 def average_price_in_regions_for_category(dataframe: DataFrame, category: str) -> DataFrame:
     """
-    Selects the particular records, that belongs to a specific commercial category and group these records by region to
-    calculate an average price. The value should be rounded, up to 2 digits after the decimal point.
-    Use name 'price_refined' for aggregated average value
+    Selects the particular records, that belongs to a specific commercial **category** and group these records by
+    region to calculate an average price. The value should be rounded, up to 2 digits after the decimal point. Use
+    name 'price_refined' for aggregated average value
     :param dataframe: input DataFrame
     :param category: one of the possible column's 'comm_type' values (sell, rent, rent_by_day).
     :return: aggregated dataframe
@@ -177,9 +177,17 @@ def top_floors(data_frame):
     return data_frame.dropna().select(top_floor).groupby(top_floor).count().sort('count', ascending=False)
 
 
-def count_selling_floors(data_frame, category):
+def count_floors_for_category(data_frame: DataFrame, category: str) -> DataFrame:
+    """
+    Selects the particular records, that belongs to a specific commercial **category** and group these records by floor
+    to calculate number of counts for each floor.
+    Use name 'counts' for aggregated count value
+    :param data_frame: input DataFrame
+    :param category: one of the possible column's 'comm_type' values (use 'sell').
+    :return: aggregated dataframe
+    """
     return data_frame.select(com_type, floor).filter(col(com_type).eqNullSafe(category)).groupby(floor)\
-        .agg(count(floor).alias('sell_counts')).sort('sell_counts', ascending=False)
+        .agg(count(floor).alias('counts')).sort('counts', ascending=False)
 
 
 def transform(df: DataFrame) -> DataFrame:
@@ -228,7 +236,7 @@ def aggregate(df_numeric: DataFrame):
     average_price_in_regions_for_category(df_numeric, rent_by_day).show(100, truncate=False)
 
     print(c('Number of selling records for each floor (Most popular floors) :', 'green'))
-    count_selling_floors(df_numeric, sell).show(100, truncate=False)
+    count_floors_for_category(df_numeric, sell).show(100, truncate=False)
 
     print(c('Number of records for each top floor (Most popular building by maximum floor) :', 'green'))
     top_floors(df_numeric).show(100, truncate=False)

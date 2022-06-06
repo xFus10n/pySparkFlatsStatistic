@@ -111,7 +111,7 @@ def test_agg_category_types_count(spark_session):
 
 def test_average_price_for_region(spark_session):
     # assign
-    test_df = get_data_frame_for_average(spark_session)
+    test_df = get_data_frame_2(spark_session)
     expected_df = get_output_for_average_price_in_sell_category(spark_session)
 
     # act
@@ -119,6 +119,20 @@ def test_average_price_for_region(spark_session):
     numeric_df = main.clean_price(categories_df)
     region_df = main.set_region_and_street(numeric_df)
     actual_df = main.average_price_in_regions_for_category(region_df, main.sell)
+
+    # assert
+    assert_pyspark_df_equal(expected_df, actual_df)
+
+
+def test_most_popular_floor(spark_session):
+    # assign
+    test_df = get_data_frame_2(spark_session)
+    expected_df = get_output_for_most_popular_floor(spark_session)
+
+    # act
+    floor_df = main.set_top_floor(test_df)
+    categories_df = main.set_categories(floor_df)
+    actual_df = main.count_floors_for_category(categories_df, main.sell)
 
     # assert
     assert_pyspark_df_equal(expected_df, actual_df)
@@ -135,15 +149,15 @@ def get_data_frame(spark_session):
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
-def get_data_frame_for_average(spark_session):
+def get_data_frame_2(spark_session):
     columns = main.original_columns
-    data = [('link1', 'desc1', 'centrs::', '3', '72', '1/5', '-', '105,003  €'),
+    data = [('link1', 'desc1', 'centrs::', '3', '72', '2/5', '-', '105,003  €'),
             ('link1', 'desc1', 'centrs::', '3', '72', '1/5', '-', '99,007  €'),
             ('link2', 'desc2', 'centrs::', '3', '74', '10/10', '119.', 'vēlosīret'),
-            ('link3', 'desc3', 'Jugla::', '2', '44', '1/5', 'Hrušč.', '55,000  €'),
+            ('link3', 'desc3', 'Jugla::', '2', '44', '3/5', 'Hrušč.', '55,000  €'),
             ('link4', 'desc4', 'centrs::', '1', '20', '1/2', 'Renov.', '115,000  €'),
             ('link5', 'desc5', 'Jugla::', '3', '65', '1/2', 'Renov.', '60,007  €'),
-            ('link5', 'desc5', 'Jugla::', '3', '65', '1/2', 'Renov.', '65,004  €'),
+            ('link5', 'desc5', 'Jugla::', '3', '65', '3/2', 'Renov.', '65,004  €'),
             ('link5', 'desc5', 'Pļavnieki::', '2', '45', '1/2', '119.', 'maiņai')]
     return spark_session.createDataFrame(data).toDF(*columns)
 
@@ -196,6 +210,12 @@ def get_output_for_categorization(spark_session):
 def get_output_for_price_refinement(spark_session):
     columns = (main.price_refined,)
     data = [('105000',), ('',), ('250',), ('30',), ('',), ('',)]
+    return spark_session.createDataFrame(data).toDF(*columns)
+
+
+def get_output_for_most_popular_floor(spark_session):
+    columns = (main.floor, 'counts')
+    data = [("1", 3), ("3", 2), ("2", 1)]
     return spark_session.createDataFrame(data).toDF(*columns)
 
 
