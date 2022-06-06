@@ -152,7 +152,7 @@ def commercials_by_category(data_frame: DataFrame) -> DataFrame:
 def top_zones_by_commercial_count(data_frame: DataFrame) -> DataFrame:
     """
     Number of records per each zone/region, sorted by column counts
-    Assuming, that aggregated column name is 'counts'
+    Assuming, that aggregated column name is 'counts'. Sort by counts, descending
     :param data_frame: input DataFrame
     :return: aggregated DataFrame
     """
@@ -164,7 +164,7 @@ def average_price_in_regions_for_category(dataframe: DataFrame, category: str) -
     """
     Selects the particular records, that belongs to a specific commercial **category** and group these records by
     region to calculate an average price. The value should be rounded, up to 2 digits after the decimal point. Use
-    name 'price_refined' for aggregated average value
+    name 'price_refined' for aggregated average value. Sort descending by 'price_refined'
     :param dataframe: input DataFrame
     :param category: one of the possible column's 'comm_type' values (sell, rent, rent_by_day).
     :return: aggregated dataframe
@@ -173,14 +173,21 @@ def average_price_in_regions_for_category(dataframe: DataFrame, category: str) -
         .agg(round(avg(price_refined), 2).alias(price_refined)).sort(price_refined, ascending=False)
 
 
-def top_floors(data_frame):
-    return data_frame.dropna().select(top_floor).groupby(top_floor).count().sort('count', ascending=False)
+def top_floors(data_frame: DataFrame) -> DataFrame:
+    """
+    Selects all records, that have value in column 'top_floor' and group these records by it to calculate a number of
+    counts. Use name 'count' for aggregated value. Sort descending by 'count'
+    :param data_frame: input DataFrame
+    :return: aggregated dataframe
+    """
+    return data_frame.filter(data_frame.top_floor.isNotNull()).select(top_floor).groupby(top_floor).count()\
+        .sort('count', ascending=False)
 
 
 def count_floors_for_category(data_frame: DataFrame, category: str) -> DataFrame:
     """
     Selects the particular records, that belongs to a specific commercial **category** and group these records by floor
-    to calculate number of counts for each floor.
+    to calculate number of counts for each floor. Sort descending by 'counts'
     Use name 'counts' for aggregated count value
     :param data_frame: input DataFrame
     :param category: one of the possible column's 'comm_type' values (use 'sell').
