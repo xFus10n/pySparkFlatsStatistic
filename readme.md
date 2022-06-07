@@ -2,7 +2,8 @@
 ###Setting up pySpark and JDK
 
 Running spark on Windows are involves a lot of setup, so install everything carefully and as shown.
-Administration rights will be needed.
+Administration rights will be needed. Make sure that you already have installation of [Python 3.9++](https://www.python.org/downloads/)
+and [PyCharm](https://www.jetbrains.com/pycharm/download) IDE.
 
 1. Make sure you have the Java 8 JDK installed. If you don't have it installed, 
 download and install [JDK](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
@@ -26,20 +27,34 @@ Rename the log4j.properties.template file to log4j.properties. Edit this file (u
 the error level from INFO to ERROR for log4j.rootCategory
 8. Right-click your Windows menu, select System. 
 Click on “Advanced System Settings” and then the “Environment Variables” button.
-
-
-
-
-
-
-Download and install [PyCharm](https://www.jetbrains.com/pycharm/download) IDE.
+9. Add the following new **USER** variables:
+   1. SPARK_HOME c:\spark
+   2. JAVA_HOME (the path you installed the JDK to in step 1, for example C:\JDK)
+   3. HADOOP_HOME c:\winutils
+   4. PYTHONPATH c:\spark\python
+10. Add the following paths to your PATH user variable:
+    1. %SPARK_HOME%\bin
+    2. %JAVA_HOME%\bin
+11. Close the environment variable screen and the control panels.
+12. Test the pySpark:
+    1. Open CMD
+    2. Enter: **cd c:\spark**
+    3. Enter: **pyspark**
+    4. Enter: **rdd = sc.textFile(“README.md”)**
+    5. Enter: **rdd.count()**
+    6. You should get a count of the number of lines in that file!
+    7. Enter: quit()
+    8. If no errors seen than you've got everything correct
     
-
-install libs :
+###Setting up project
+To be able to run the spark job, please install libraries that you can locate in requirements.txt file.
+In terminal, execute next command to install them:
 ````shell
 pip install -r requirements.txt
 ````
 
+The main job is located in pyspark.py file. The script there uses files from RAW directory to 
+extract, transform and analyse the flats commercials that available in Riga.
 
 run tests from terminal: 
 ````shell
