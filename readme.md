@@ -54,11 +54,31 @@ pip install -r requirements.txt
 ````
 
 ###Project Overview
-The main job is located in pyspark.py file. The script there uses files from RAW directory to 
-extract, transform and analyse the flats commercials that available in Riga.
+The main job is located in pyspark.py file. The script there uses files from RAW directory 
+(each csv file represents all ads for Riga region on the particular date) to extract, transform and analyse the flats commercials that available in Riga.
+The task is to implement 10 missing functions (you can find them by searching for **pass** keyword). Those are:
+* set_region_and_street
+* set_top_floor
+* set_categories
+* clean_price
+* commercials_by_house_type
+* commercials_by_category
+* top_zones_by_commercial_count
+* average_price_in_regions_for_category
+* count_floors_for_category
+* top_floors
+The documentation can be found inside the function's body.
 
-run tests from terminal: 
+The result can be checked by running all or particular test. You can do it from IDE or from terminal.
+Tests located in **.\test\pyTest.py**
+Run test from IDE: 
+* Push green triangle near the test (particular test)
+* Right mouse button on file **.\test\pyTest.py** -> push green triangle (run all tests)
+Run tests from terminal: 
 ````shell
 pytest .\test\pyTest.py  # all test
 pytest .\test\pyTest.py::test_top_floor_extract  # particular test  
 ````
+
+After the successful implementation of all functions, you should be able to run the main script located in
+**py_spark.py** (hit the green triangle near the ``if __name__ == '__main__':`` statement)
