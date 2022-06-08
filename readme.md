@@ -59,6 +59,6 @@ extract, transform and analyse the flats commercials that available in Riga.
 
 run tests from terminal: 
 ````shell
-pytest .\test\pyTest.py
-pytest .\test\pyTest.py::{test_name}
+pytest .\test\pyTest.py  # all test
+pytest .\test\pyTest.py::test_top_floor_extract  # particular test  
 ````

@@ -78,13 +78,7 @@ def set_categories(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
-    df_sell = data_frame.withColumn(com_type, categorize(price, '€', sell))
-    df_rent = df_sell.withColumn(com_type, categorize(price, '€/mēn', rent, other_col=com_type))
-    df_rent_day = df_rent.withColumn(com_type, categorize(price, '€/dienā', rent_by_day, other_col=com_type))
-    df_want = df_rent_day.withColumn(com_type, categorize(price, 'vēlosīret', want_2_rent, other_col=com_type))
-    df_buy = df_want.withColumn(com_type, categorize(price, 'pērku', buy, other_col=com_type))
-    df_chng = df_buy.withColumn(com_type, categorize(price, 'maiņai', change, other_col=com_type))
-    return df_chng.withColumn(com_type, when(df_chng.com_type.isNull(), lit('other')).otherwise(df_chng.com_type))
+    pass
 
 
 def clean_price(data_frame: DataFrame) -> DataFrame:
@@ -94,18 +88,18 @@ def clean_price(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
-    return data_frame.withColumn(price_refined, regexp_replace(col(price), "[^0-9]", ""))
+    pass
 
 
 def set_top_floor(data_frame: DataFrame) -> DataFrame:
     """
     From 'floor' column extract upper floor of the building. Use 'top_floor' column
+    Hint: you need to create additional column to store intermediate value
+    Please, ensure that column 'floor' contains only floor position (not position/max floor)
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
-    df_top_floor_split = data_frame.withColumn(floor_split, split(data_frame.floor, "/"))
-    return df_top_floor_split.withColumn(top_floor, df_top_floor_split.floor_split.getItem(1)) \
-        .withColumn(floor, df_top_floor_split.floor_split.getItem(0))
+    pass
 
 
 def set_region_and_street(data_frame: DataFrame) -> DataFrame:
@@ -114,9 +108,7 @@ def set_region_and_street(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
-    df_split = data_frame.withColumn(split_street, split(data_frame.street, "::"))
-    return df_split.withColumn(region, df_split.split_street.getItem(0)) \
-        .withColumn(street, df_split.split_street.getItem(1))
+    pass
 
 
 def commercials_by_house_type(data_frame: DataFrame) -> DataFrame:
@@ -128,11 +120,7 @@ def commercials_by_house_type(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
-    return data_frame.select(house_type) \
-        .withColumn(house_type, regexp_replace(col(house_type), '-', 'Unspecified')) \
-        .groupby(house_type) \
-        .count() \
-        .sort('count', ascending=False)
+    pass
 
 
 def commercials_by_category(data_frame: DataFrame) -> DataFrame:
@@ -143,10 +131,7 @@ def commercials_by_category(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: aggregated DataFrame
     """
-    return data_frame.select(com_type) \
-        .groupby(com_type) \
-        .count() \
-        .sort('count', ascending=False)
+    pass
 
 
 def top_zones_by_commercial_count(data_frame: DataFrame) -> DataFrame:
@@ -156,8 +141,7 @@ def top_zones_by_commercial_count(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: aggregated DataFrame
     """
-    return data_frame.select(region).groupby(region).agg(count(region).alias('counts')) \
-        .sort('counts', ascending=False)
+    pass
 
 
 def average_price_in_regions_for_category(dataframe: DataFrame, category: str) -> DataFrame:
@@ -169,8 +153,7 @@ def average_price_in_regions_for_category(dataframe: DataFrame, category: str) -
     :param category: one of the possible column's 'comm_type' values (sell, rent, rent_by_day).
     :return: aggregated dataframe
     """
-    return dataframe.filter(col(com_type).eqNullSafe(category)).groupby(region) \
-        .agg(round(avg(price_refined), 2).alias(price_refined)).sort(price_refined, ascending=False)
+    pass
 
 
 def top_floors(data_frame: DataFrame) -> DataFrame:
@@ -180,8 +163,7 @@ def top_floors(data_frame: DataFrame) -> DataFrame:
     :param data_frame: input DataFrame
     :return: aggregated dataframe
     """
-    return data_frame.filter(data_frame.top_floor.isNotNull()).select(top_floor).groupby(top_floor).count()\
-        .sort('count', ascending=False)
+    pass
 
 
 def count_floors_for_category(data_frame: DataFrame, category: str) -> DataFrame:
@@ -193,8 +175,7 @@ def count_floors_for_category(data_frame: DataFrame, category: str) -> DataFrame
     :param category: one of the possible column's 'comm_type' values (use 'sell').
     :return: aggregated dataframe
     """
-    return data_frame.select(com_type, floor).filter(col(com_type).eqNullSafe(category)).groupby(floor)\
-        .agg(count(floor).alias('counts')).sort('counts', ascending=False)
+    pass
 
 
 def transform(df: DataFrame) -> DataFrame:
