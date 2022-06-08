@@ -75,6 +75,7 @@ def set_categories(data_frame: DataFrame) -> DataFrame:
     Set categories for records, use 'com_type' column
     Categories can be found in the header, example: change, buy, want_2_rent ...
     Each category has identifier in the price which you can use to set it
+    Use 'other' keyword if no category can be identified
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
@@ -94,7 +95,7 @@ def clean_price(data_frame: DataFrame) -> DataFrame:
 def set_top_floor(data_frame: DataFrame) -> DataFrame:
     """
     From 'floor' column extract upper floor of the building. Use 'top_floor' column
-    Hint: you need to create additional column to store intermediate value
+    Hint: you need to create additional column to store intermediate value (check aggregated columns from the top)
     Please, ensure that column 'floor' contains only floor position (not position/max floor)
     :param data_frame: input DataFrame
     :return: output DataFrame
@@ -105,6 +106,8 @@ def set_top_floor(data_frame: DataFrame) -> DataFrame:
 def set_region_and_street(data_frame: DataFrame) -> DataFrame:
     """
     From 'street' column extract location, use 'region' for new column name
+    Hint: you need to create additional column to store intermediate value (check aggregated columns from the top)
+    Please, ensure that column 'street' contains only street (not region::street)
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
