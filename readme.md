@@ -1,5 +1,5 @@
-##Project setup guide
-###Setting up pySpark and JDK
+##Project Setup Guide
+###Setting up PySpark and JDK
 
 Running spark on Windows are involves a lot of setup, so install everything carefully and as shown.
 Administration rights will be needed. Make sure that you already have installation of [Python 3.9++](https://www.python.org/downloads/)
@@ -46,13 +46,14 @@ Click on “Advanced System Settings” and then the “Environment Variables”
     7. Enter: quit()
     8. If no errors seen than you've got everything correct
     
-###Setting up project
+###Setting up Project
 To be able to run the spark job, please install libraries that you can locate in requirements.txt file.
 In terminal, execute next command to install them:
 ````shell
 pip install -r requirements.txt
 ````
 
+###Project Overview
 The main job is located in pyspark.py file. The script there uses files from RAW directory to 
 extract, transform and analyse the flats commercials that available in Riga.
 
