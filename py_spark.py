@@ -100,6 +100,8 @@ def clean_price(data_frame: DataFrame) -> DataFrame:
 def set_top_floor(data_frame: DataFrame) -> DataFrame:
     """
     From 'floor' column extract upper floor of the building. Use 'top_floor' column
+    Hint: you need to create additional column to store intermediate value
+    Please, ensure that column 'floor' contains only floor position (not position/max floor)
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
