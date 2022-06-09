@@ -76,6 +76,8 @@ def set_categories(data_frame: DataFrame) -> DataFrame:
     Categories can be found in the header, example: change, buy, want_2_rent ...
     Each category has identifier in the price which you can use to set it
     Use 'other' keyword if no category can be identified
+    Hint: Use function 'categorize' to set specific value for specific condition. Of course, you are free to choose your
+    own implementation.
     :param data_frame: input DataFrame
     :return: output DataFrame
     """
